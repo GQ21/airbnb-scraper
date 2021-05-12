@@ -18,7 +18,7 @@ Scraper was created with:
 * Beautifulsoup4 4.9.3
 * Pandas 1.1.5
 * Selenium 3.141.0
-* Chrome 88.0
+* Chrome 90.0
 
 ## Installation
 
