@@ -42,18 +42,17 @@ then initialize scraper object with path where you downloaded crome path (for ex
 
 ```scraper = Scraper(C:\\Users\\PC\\chromedriver.exe)```
 
-and finally we can start scraping by specifying city, samples count you want to scrape and filename, path where you would like to save collected data (by default it will save data to your working directory):
+and finally we can start scraping by specifying city,country name,samples count you want to scrape and filename, path where you would like to save collected data (by default it will save data to your working directory):
 
 ```
 samples = 10
 city = "Oslo"
-scraper.collect_city_items(samples,city)
+country = "Norway"
+scraper.collect_city_items(samples,city,country)
 scraper.write_dataframe("C:\\Users\\PC\\dataframes\\", "Airbnb.csv")
 ```
 
-Be aware that Airbnb shows only 300 stays per search. Other important notice that sometimes cities can duplicate so you should be more specific and supplement country name as well. To do that use "--" seperator between keywords for example:
-
-```city = "Oslo--Norway"```
+Be aware that Airbnb shows only 300 stays per search.
 
 ## Data
 Scraper will scrape list of accommodations and extract data containing:

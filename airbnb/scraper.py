@@ -131,21 +131,23 @@ class Scraper:
         time.sleep(random.randint(2, 3))
         return self.__driver.page_source
 
-    def get_city_url(self, city: str) -> str:
+    def get_city_url(self, city: str, country:str) -> str:
         """
-        Takes city name and inserts into AirBnB search query url
+        Takes city,country name and inserts into AirBnB search query url
 
         Parameters
         ----------
             city:str
                 City name
+            country:
+                Country name
 
         Returns
         ----------
             url: str
                 Airbnb search query url
         """
-        url = f"https://www.airbnb.com/s/{city}/homes?tab_id=home_tab&refinement_paths%5B%5D=%2Fhomes&flexible_trip_dates%5B%5D=july&flexible_trip_dates%5B%5D=june&flexible_trip_dates%5B%5D=august&date_picker_type=flexible_dates&flexible_trip_lengths%5B%5D=one_week"
+        url = f"https://www.airbnb.com/s/{city}--{country}/homes?tab_id=home_tab&refinement_paths%5B%5D=%2Fhomes&flexible_trip_dates%5B%5D=july&flexible_trip_dates%5B%5D=june&flexible_trip_dates%5B%5D=august&date_picker_type=flexible_dates&flexible_trip_lengths%5B%5D=one_week"
         return url
 
     def find_next_page(self, soup: BeautifulSoup) -> Optional[str]:
@@ -170,9 +172,9 @@ class Scraper:
             next_page = None
         return next_page
 
-    def collect_city_items(self, samples: int, city: str) -> None:
+    def collect_city_items(self, samples: int, city: str, country:str) -> None:
         """
-        Takes city name and number of samples that needs to be scraped, then tries to find needed data and adds it
+        Takes city,country name and number of samples that needs to be scraped, then tries to find needed data and adds it
         into collected_dic dictionary.
 
         Parameters
@@ -181,27 +183,29 @@ class Scraper:
                 samples that should be collected. Be aware that AirBnB shows only 300 entries, therefore maximum limit is 300 samples
             city:str
                 City name
+            country:str
+                Country name
 
         Returns
         ----------
             None
         """
         time_start = time.time()
-        url = self.get_city_url(city)
+        url = self.get_city_url(city,country)
         samples_taken = 0
         while url != None:
 
             page_source = self.get_page_source(url, "_1g5ss3l")
             soup = BeautifulSoup(page_source, "html.parser")           
             for item in soup.find_all("div", class_="_fhph4u"):                
-                if samples_taken == samples or samples_taken == 300:
+                if samples_taken == samples:
                     self.__driver.quit()
                     print(
-                        f"{city.split('--')[0]} scraping is done! Time elapsed: {time.time()-time_start} seconds."
+                        f"{city} scraping is done!{samples_taken} samples was taken.Time elapsed: {time.time()-time_start} seconds."
                     )
                     return
                 else:
-                    self.__collected_dic["city"].append(city.split("--")[0])
+                    self.__collected_dic["city"].append(city)
 
                     item_url = self.get_item_url(item)
                     self.get_item_title(item)
@@ -219,6 +223,9 @@ class Scraper:
 
                     samples_taken = samples_taken + 1
             url = self.find_next_page(soup)
+        print(
+            f"{city} scraping is done!{samples_taken} samples was taken.Time elapsed: {time.time()-time_start} seconds."
+        )
 
     def collect_amenities(self, url: str) -> None:
         """
@@ -269,9 +276,9 @@ class Scraper:
             self.get_amenity_tv(amenities)
             self.get_amenity_parking(amenities)
 
-    def collect_all(self, samples: int, cities: list) -> None:
+    def collect_all(self, samples: int, cities: list, country:str) -> None:
         """
-        Takes cities list and number of samples that needs to be scraped, loops through every city,
+        Takes cities list,country name and number of samples that needs to be scraped, loops through every city,
         scrapes data and appends to collected_dic dictionary.
 
         Parameters
@@ -280,6 +287,8 @@ class Scraper:
                 Samples that should be collected. Be aware that AirBnB shows only 300 entries, therefore maximum limit is 300 samples
             city:list
                 List which contains cities names as strings.
+            country:str
+                Country name where city is located          
 
         Returns
         ----------
@@ -288,7 +297,7 @@ class Scraper:
 
         time_start = time.time()
         for city in cities:
-            self.collect_city_items(samples, city)
+            self.collect_city_items(samples,city,country)
         print(f"All scraping is done! Time elapsed: {time.time()-time_start} seconds.")
 
     def get_item_url(self, soup: BeautifulSoup) -> Optional[str]:
